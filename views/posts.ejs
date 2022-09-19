@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/styles/bootstrap.css">
+    <link rel="stylesheet" href="/styles/bootstrap.min.css">
+    <link rel="stylesheet" href="/styles/style.css">
+    <title>
+        <%= title %>
+    </title>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <table class="table table-hover">
+            
+            <thead class="table-dark">
+              <tr>
+                <th scope="col">Title</th>
+                <th scope="col">Content</th>
+                <th scope="col">Image</th>
+                <th scope="col">Author</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            
+            <tbody>
+                <% if(posts.length > 0) { %>
+                    <% for(let post of posts) { %>
+                        <tr>
+                            <th scope="row"><%= post.title %></th>
+                            <td><%= post.content %></td>
+                            <td><img src="/<%= post.image %>" class="img-fluid"></td>
+                            <td><%= post.author %></td>
+                            <td>
+                            <a href="/update/post/<%= post._id %>" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="/delete/post/<%= post._id %>" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                    <% } %>
+                <% } else { %>    
+                    <tr>
+                        <td>No Data Found..</td>
+                    </tr>
+                <% } %>    
+            </tbody>
+        
+        </table>
+
+    </div>
+
+
+  <script src="/js/bootstrap.js"></script>
+  <script src="/js/script.js"></script>
+
+</body>
+</html>
