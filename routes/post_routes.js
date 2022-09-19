@@ -24,6 +24,7 @@ const  {
 // ============================
 
 router.get('*', checkUser)
+router.get('/', welcome);
 router.get('/home', welcome);
 router.get('/all/posts', allPosts);
 router.get('/create/post', auth, createPostPage)
