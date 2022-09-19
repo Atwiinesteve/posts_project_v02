@@ -1,22 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
+<%- include('partials/header') %> 
 
-<head>
-    <meta charset="UTF-8">
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="/styles/bootstrap.css">
-    <link rel="stylesheet" href="/styles/bootstrap.min.css">
-    <link rel="stylesheet" href="/styles/style.css">
-    <title>
-        <%= title %>
-    </title>
-</head>
 
-<body>
+    <%- include('partials/navbar') %>
+
 
     <div class="container">
 
-        <table class="table table-hover">
+        <table class="table mt-5 table-hover">
             
             <thead class="table-dark">
               <tr>
@@ -54,8 +44,4 @@
     </div>
 
 
-  <script src="/js/bootstrap.js"></script>
-  <script src="/js/script.js"></script>
-
-</body>
-</html>
+<%- include('partials/footer') %> 

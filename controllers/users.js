@@ -1,11 +1,15 @@
 // =================================================
 const multer = require('multer');
+const bcrypt = require('bcrypt');
 const path = require('path');
+const jwt = require('jsonwebtoken');
 require("dotenv").config();
 
 
 
 // =================================================
+const User = require('../models/User');
+const { request } = require('http');
 const Post = require('../models/Post');
 
 
@@ -16,10 +20,25 @@ const Post = require('../models/Post');
 // ==== API GET FUNCTIONS====
 // ==========================
 
-// ==========================
-
+// Welcome page
 function welcome(request, response) {
   return response.status(200).render('home', { title: 'Home'});
+}
+
+// Register Page.
+function registerPage(request, response) {
+  return response.status(200).render('register', { title: 'Register' })
+};
+
+// Login Page.
+function loginPage(request, response) {
+  return response.status(200).render('login', { title: 'Login' })
+};
+
+// Show Dashboard
+async function dashboardPage(request, response) {
+  const posts = await Post.find();
+  return response.status(200).render('dashboard', { title: 'User Dashboard', posts: posts })
 }
 
 
@@ -30,106 +49,87 @@ function welcome(request, response) {
 // ===========================
 
 // upload images.
-const storage = multer.diskStorage({
-  destination: function(request, file, cb) {
-    cb(null, path.join(__dirname, '../uploads'));
+const imageStorage = multer.diskStorage({
+  destination: (request, file, cb) => {
+    cb(null, path.join(__dirname, '../uploads'))
   },
-  filename: function(request, file, cb) {
-    cb(null, file.fieldname + Date.now() + "---" + file.originalname);
+  filename: (request, file, cb) => {
+    cb(null, file.fieldname + '-' + Date.now() + '-' + file.originalname)
   }
 });
-
-const uploads = multer({
-  storage: storage
+const storeImage = multer({
+  storage: imageStorage
 })
 
-// show all posts
-const allPosts = async(request, response) => {
+// create user
+const registerUser = async(request, response) => {
   try {
-    const posts = await Post.find();
-    if(posts) {
-      return response.status(200).render('posts', { posts: posts, title: 'Posts' });
+    const userAlreadyExists = await User.findOne({ email: request.body.email });
+    if(userAlreadyExists) {
+      return response.status(201).render('registeredUser', { title: 'Registered..'})
     } else {
-      return response.status(400).json({ message: 'No Posts Found..' })
+      const salt = await bcrypt.genSalt(12);
+      const hash = await bcrypt.hash(request.body.password, salt);
+      const user = new User({
+        full_names: request.body.full_names,
+        username: request.body.username,
+        email: request.body.email,
+        image: request.file.filename,
+        password: hash,
+      });
+      user.save()
+        .then(() => { response.status(201).render('createdUser', { title: 'User Created..', message: 'User Created Successfully..' }) })
+        .catch(err => { console.log({ message: err.message }) })
+    }
+
+  } catch (error) {
+    console.log({ name: error.name, message: error.message, stack: error.stack });
+    return response.status(500).render('serverError', { title: 'Server Error..', message: 'Server Shutdoen Error. Please try again Later. Apologies for losses caused..' })
+  }
+};
+
+// login user.
+const loginUser = async(request, response) => {
+  try {
+    const user = await User.findOne({ email: request.body.email });
+    if(!user) {
+      return response.status(404).render('userNotFound', { title: 'User Not Found..', message: 'User Not Found..' })
+    } else {
+      const validPassword = await bcrypt.compare(request.body.password, user.password);
+      if(!validPassword) {
+        return response.status(400).render('invalidPassEmail', { title: 'Invalid..', message: 'Invalid Password / Email..'})
+      } else {
+        const maxAge = 1*24*60*60;
+        const token = jwt.sign({ id: user._id }, process.env.TOKEN, { expiresIn: maxAge });
+        response.cookie('token', token, { maxAge: maxAge, httpOnly: true, secure: true, SameSite: true })
+        return response.status(200).redirect('/api/dashboard');
+      }
     }
   } catch (error) {
     console.log({ name: error.name, message: error.message, stack: error.stack });
-    return response.status(500).json({ message: 'Server Under Maintainance..' })
+    return response.status(500).render('serverError', { title: 'Server Error..', message: 'Server Shutdoen Error. Please try again Later. Apologies for losses caused..' })
   }
 };
 
-// create post
-const createPost = async(request, response) => {
-  try {
-    const post = new Post({
-      title: request.body.title,
-      content: request.body.content,
-      image: request.file.filename,
-      author: request.body.author,
-    });
-    post.save()
-      .then(() => { response.json({ post }); })
-      .catch(err => { console.log({ message: err.message }) })
+// edit user
 
-  } catch (error) {
-    console.log({ name: error.name, message: error.message, stack: error.stack });
-    return response.status(500).json({ message: 'Server Under Maintainance..' })
-  }
-};
+// delete user
 
-// edit post
-const editPost = async(request, response) => {
-  try {
-    const id = request.params.id;
-    const updateContent = {
-      title: request.body.title,
-      content: request.body.content,
-      image: request.file.filename,
-      author: request.body.author, 
-    };
-    const updated = await Post.findByIdAndUpdate(id, { $set: updateContent });
-    if(updated) {
-      return response.status(200).json({ message: 'Post Updated Successfully..' })
-    } else {
-      return response.status(400).json({ message: 'Post Update Failure..' })
-    }
-  } catch (error) {
-    console.log({ name: error.name, message: error.message, stack: error.stack });
-    return response.status(500).json({ message: 'Server Under Maintainance..' })
-  }
-};
-
-// delete post.
-const deletePostPage = async (request, response) => {
-  const id = request.params.id;
-  const post = Post.findById(id);
-  return response.status(200).render('delete', { post: post, title: 'Delete Post' } )
-};
-
-// delete post.
-const deletePost = async (request, response) => {
-  try {
-    const id = request.params.id;
-    const deleted = await Post.findByIdAndDelete(id);
-    if(deleted) {
-      return response.status(200).send('Post Deleted Successfully..')
-    } else {
-      return response.status(400).send('Post Not Deleted or Not Found..')
-    }
-  } catch (error) {
-    console.log({ name: error.name, message: error.message, stack: error.stack });
-    return response.status(500).send('Server Under Maintainance..')
-  }
-};
+// user logout
+function logoutUser(request, response) {
+  response.cookie('token', '', { maxAge: 0.0001 })
+  return response.redirect('/login');
+}
 
 
 // =================================================
 module.exports = {
   welcome,
-  uploads,
-  allPosts,
-  createPost,
-  editPost,
-  deletePostPage,
-  deletePost
+  storeImage,
+  registerPage,
+  dashboardPage,
+  registerUser,
+  loginPage,
+  loginUser,
+  logoutUser
 }

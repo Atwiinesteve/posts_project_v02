@@ -1,4 +1,5 @@
 // =================================================
+const { application } = require('express');
 const express = require('express');
 
 // =================================================
@@ -7,50 +8,54 @@ const router = express.Router();
 // =================================================
 const  { 
   welcome,
-  uploads,
-  createPost,
-  allPosts,
-  editPost,
-  deletePost,
-  deletePostPage
-} = require("../controllers/posts");
+  storeImage,
+  registerPage,
+  registerUser,
+  loginPage,
+  loginUser,
+  logoutUser,
+  dashboardPage
+} = require("../controllers/users");
 
-// =================================================
+// import auths.
+const { auth, checkUser } = require('../auth/authenticate');
+
+
 
 // ============================
 // ====== API GET METHOD ======
 // ============================
-
+router.get('*', checkUser);
 router.get('/', welcome);
 router.get('/home', welcome);
-router.get('/all/posts', allPosts);
+router.get('/register/user', registerPage)
+router.get('/login/user', loginPage)
+router.get('/dashboard', auth, dashboardPage);
+router.get('/logout', logoutUser)
 
-// =================================================
+
 
 // ============================
 // ===== API POST METHOD ======
 // ============================
+router.post("/register/user", storeImage.single('image'), registerUser);
+router.post("/login/user", loginUser);
 
-router.post("/create/post", uploads.single("image"), createPost);
 
-// =================================================
 
 // ============================
 // ===== API PUT METHOD ======
 // ============================
 
-router.put("/update/post/:id", uploads.single('image'), editPost);
 
-// =================================================
 
 // ============================
 // ==== API DELETE METHOD =====
 // ============================
-router.get('/delete/post/:id', deletePostPage);
-router.delete("/delete/post/:id", deletePost);
 
 
 
 
-// =================================================
+
+// Exports.
 module.exports = router;

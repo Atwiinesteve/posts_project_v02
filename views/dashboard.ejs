@@ -13,6 +13,7 @@
           <th scope="col">Content</th>
           <th scope="col">Image</th>
           <th scope="col">Author</th>
+          <th scope="col">Actions</th>
         </tr>
       </thead>
       
@@ -24,6 +25,10 @@
                       <td><%= post.content %></td>
                       <td><img src="/<%= post.image %>" class="img-fluid"></td>
                       <td><%= post.author %></td>
+                      <td>
+                      <a href="/api/update/post/<%= post._id %>" class="btn btn-sm btn-warning">Edit</a>
+                      <a href="/api/delete/post/<%= post._id %>" class="btn btn-sm btn-danger">Delete</a>
+                      </td>
                   </tr>
               <% } %>
           <% } else { %>    
@@ -35,7 +40,8 @@
   
   </table>
 
- </div>
+</div>
+
 
 
 <%- include('partials/footer') %> 
