@@ -16,7 +16,7 @@ function checkUser(request, response, next) {
   if(token) {
    jwt.verify(token, process.env.TOKEN, async(error, decodedID) => {
     if(!error) {
-     const user = await User.findById(decodedID._id);
+     const user = await User.findById(decodedID.id);
      response.locals.user = user;
      next();
     } else {

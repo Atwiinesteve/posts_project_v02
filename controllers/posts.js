@@ -22,9 +22,9 @@ async function welcome(request, response) {
   return response.status(200).render('home', { title: 'Home', posts: posts });
 }
 
-// Register Page.
-function registerPage(request, response) {
-  return response.status(200).render('register', { title: 'Register' })
+// Create Posts Page.
+function createPostPage(request, response) {
+  return response.status(200).render('createPost', { title: 'Create Post' })
 }
 
 
@@ -73,7 +73,7 @@ const createPost = async(request, response) => {
       author: request.body.author,
     });
     post.save()
-      .then(() => { response.json({ post }); })
+      .then(() => { response.status(200).redirect('/api/dashboard') })
       .catch(err => { console.log({ message: err.message }) })
 
   } catch (error) {
@@ -131,7 +131,7 @@ const deletePost = async (request, response) => {
 // =================================================
 module.exports = {
   welcome,
-  registerPage,
+  createPostPage,
   uploads,
   allPosts,
   createPost,

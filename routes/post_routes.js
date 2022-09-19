@@ -1,5 +1,6 @@
 // =================================================
 const express = require('express');
+const { auth, checkUser } = require('../auth/authenticate');
 
 // =================================================
 const router = express.Router();
@@ -12,7 +13,8 @@ const  {
   allPosts,
   editPost,
   deletePost,
-  deletePostPage
+  deletePostPage,
+  createPostPage
 } = require("../controllers/posts");
 
 // =================================================
@@ -21,9 +23,11 @@ const  {
 // ====== API GET METHOD ======
 // ============================
 
+router.get('*', checkUser)
 router.get('/', welcome);
 router.get('/home', welcome);
 router.get('/all/posts', allPosts);
+router.get('/create/post', auth, createPostPage)
 
 // =================================================
 

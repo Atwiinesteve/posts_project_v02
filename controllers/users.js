@@ -66,7 +66,7 @@ const registerUser = async(request, response) => {
   try {
     const userAlreadyExists = await User.findOne({ email: request.body.email });
     if(userAlreadyExists) {
-      return response.status(201).render('registeredUser', { title: 'Registered..'})
+      return response.status(201).render('registeredUser', { title: 'Registered..', message: 'User Already Registered..', user: userAlreadyExists })
     } else {
       const salt = await bcrypt.genSalt(12);
       const hash = await bcrypt.hash(request.body.password, salt);
@@ -78,7 +78,7 @@ const registerUser = async(request, response) => {
         password: hash,
       });
       user.save()
-        .then(() => { response.status(201).render('createdUser', { title: 'User Created..', message: 'User Created Successfully..' }) })
+        .then(() => { response.status(201).render('createdUser', { title: 'User Created..', message: 'User Created Successfully..', user: user }) })
         .catch(err => { console.log({ message: err.message }) })
     }
 
@@ -93,7 +93,7 @@ const loginUser = async(request, response) => {
   try {
     const user = await User.findOne({ email: request.body.email });
     if(!user) {
-      return response.status(404).render('userNotFound', { title: 'User Not Found..', message: 'User Not Found..' })
+      return response.status(404).render('userNotFound', { title: 'User Not Found', message: `User with email ${request.body.email} Not Found. Try Registering..`, user: user })
     } else {
       const validPassword = await bcrypt.compare(request.body.password, user.password);
       if(!validPassword) {
@@ -101,7 +101,7 @@ const loginUser = async(request, response) => {
       } else {
         const maxAge = 1*24*60*60;
         const token = jwt.sign({ id: user._id }, process.env.TOKEN, { expiresIn: maxAge });
-        response.cookie('token', token, { maxAge: maxAge, httpOnly: true, secure: true, SameSite: true })
+        response.cookie('token', token, { maxAge: maxAge, httpOnly: true, secure: true })
         return response.status(200).redirect('/api/dashboard');
       }
     }
@@ -118,7 +118,7 @@ const loginUser = async(request, response) => {
 // user logout
 function logoutUser(request, response) {
   response.cookie('token', '', { maxAge: 0.0001 })
-  return response.redirect('/login');
+  return response.redirect('/api/login/user');
 }
 
 
