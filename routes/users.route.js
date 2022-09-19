@@ -26,7 +26,6 @@ const { auth, checkUser } = require('../auth/authenticate');
 // ====== API GET METHOD ======
 // ============================
 router.get('*', checkUser);
-router.get('/', welcome);
 router.get('/home', welcome);
 router.get('/register/user', registerPage)
 router.get('/login/user', loginPage)
