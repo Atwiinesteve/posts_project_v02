@@ -106,8 +106,9 @@ const loginUser = async(request, response) => {
       }
     }
   } catch (error) {
+    const user = await User.find();
     console.log({ name: error.name, message: error.message, stack: error.stack });
-    return response.status(500).render('serverError', { title: 'Server Error..', message: 'Server Shutdoen Error. Please try again Later. Apologies for losses caused..' })
+    return response.status(500).render('serverError', { title: 'Server Error..', message: 'Server Shutdown Error. Please try again Later. Apologies for losses caused..', user: user })
   }
 };
 
