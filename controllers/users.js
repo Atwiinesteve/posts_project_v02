@@ -66,7 +66,7 @@ const registerUser = async(request, response) => {
   try {
     const userAlreadyExists = await User.findOne({ email: request.body.email });
     if(userAlreadyExists) {
-      return response.status(201).render('registeredUser', { title: 'Registered..', message: 'User Already Registered..', user: userAlreadyExists })
+      return response.status(201).render('registeredUser', { title: 'Registered..', message: 'User Already Registered..', user: null })
     } else {
       const salt = await bcrypt.genSalt(12);
       const hash = await bcrypt.hash(request.body.password, salt);
@@ -78,7 +78,7 @@ const registerUser = async(request, response) => {
         password: hash,
       });
       user.save()
-        .then(() => { response.status(201).render('createdUser', { title: 'User Created..', message: 'User Created Successfully..', user: user }) })
+        .then(() => { response.status(201).render('createdUser', { title: 'User Created..', message: 'User Created Successfully..', user: null }) })
         .catch(err => { console.log({ message: err.message }) })
     }
 
@@ -97,7 +97,7 @@ const loginUser = async(request, response) => {
     } else {
       const validPassword = await bcrypt.compare(request.body.password, user.password);
       if(!validPassword) {
-        return response.status(400).render('invalidPassEmail', { title: 'Invalid..', message: 'Invalid Password / Email..'})
+        return response.status(400).render('invalidPassEmail', { title: 'Invalid..', message: 'Invalid Password / Email..', user: null })
       } else {
         const maxAge = 1*24*60*60;
         const token = jwt.sign({ id: user._id }, process.env.TOKEN, { expiresIn: maxAge });
@@ -106,7 +106,7 @@ const loginUser = async(request, response) => {
       }
     }
   } catch (error) {
-    const user = await User.find();
+    const user = await User.find({ email: request.body.email });
     console.log({ name: error.name, message: error.message, stack: error.stack });
     return response.status(500).render('serverError', { title: 'Server Error..', message: 'Server Shutdown Error. Please try again Later. Apologies for losses caused..', user: user })
   }

@@ -14,7 +14,8 @@ const  {
   editPost,
   deletePost,
   deletePostPage,
-  createPostPage
+  createPostPage,
+  showEditPage
 } = require("../controllers/posts");
 
 // =================================================
@@ -28,6 +29,7 @@ router.get('/', welcome);
 router.get('/home', welcome);
 router.get('/all/posts', allPosts);
 router.get('/create/post', auth, createPostPage)
+router.get('/update/post/:id', auth, showEditPage);
 
 // =================================================
 
@@ -43,7 +45,7 @@ router.post("/create/post", uploads.single("image"), createPost);
 // ===== API PUT METHOD ======
 // ============================
 
-router.put("/update/post/:id", uploads.single('image'), editPost);
+router.post("/update/post/:id", uploads.single('image'), editPost);
 
 // =================================================
 

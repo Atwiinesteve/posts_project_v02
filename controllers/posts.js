@@ -25,7 +25,14 @@ async function welcome(request, response) {
 // Create Posts Page.
 function createPostPage(request, response) {
   return response.status(200).render('createPost', { title: 'Create Post' })
-}
+};
+
+// Edit Post Page.
+async function showEditPage(request, response) {
+  const id = request.params.id;
+  const post = await Post.findById(id);
+  return response.status(200).render('editPage', { title: 'Edit Post', post: post });
+};
 
 
 // =================================================
@@ -94,9 +101,9 @@ const editPost = async(request, response) => {
     };
     const updated = await Post.findByIdAndUpdate(id, { $set: updateContent });
     if(updated) {
-      return response.status(200).json({ message: 'Post Updated Successfully..' })
+      return response.status(200).render('updateSuccess', { message: 'Post Updated Successfully..' })
     } else {
-      return response.status(400).json({ message: 'Post Update Failure..' })
+      return response.status(400).render('updateFail', { message: 'Post Update Failure..' })
     }
   } catch (error) {
     console.log({ name: error.name, message: error.message, stack: error.stack });
@@ -136,6 +143,7 @@ module.exports = {
   allPosts,
   createPost,
   editPost,
+  showEditPage,
   deletePostPage,
   deletePost
 }
